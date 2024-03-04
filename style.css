@@ -1,0 +1,18 @@
+/* Style for the grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 5px;
+}
+
+/* Style for grid items */
+.grid-item {
+  background-color: #ccc;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.grid-item:hover {
+  background-color: #ddd;
+}
