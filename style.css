@@ -1,8 +1,10 @@
 /* Style for the grid */
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  grid-template-rows: repeat(3,minmax(0,1fr));
   grid-gap: 5px;
+  height:1000px;
 }
 
 /* Style for grid items */
@@ -15,4 +17,8 @@
 
 .grid-item:hover {
   background-color: #ddd;
+}
+div {
+  background-color: red;
+  aspect-ratio: 1;
 }
