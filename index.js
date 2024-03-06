@@ -278,13 +278,22 @@ function isVisited(visited, state) {
     return inVisited;
 }
 function BFS() {
+    if(!isSolvable(initialState.state))
+    {
+        alert("UnSolvable")
+        return;
+    }
+    console.time("BFS_Time");
     const queue = new Queue();
     queue.enqueue(initialState); // Enqueue the initial state
     var visited = [];
     while (!queue.isEmpty()) {
         currentState = queue.dequeue()
         if (isGoal(currentState))
+        {
+            console.timeEnd("BFS_Time");
             return currentState;
+        }    
         else {
             states = getChildStates(currentState);
             states.forEach(element => {
@@ -292,19 +301,27 @@ function BFS() {
                     queue.enqueue(element);
             });
         }
-
+        visited.push(currentState);
     }
-    visited.push(currentState);
     return null;
 }
 function DFS() {
+    if(!isSolvable(initialState.state))
+    {
+        alert("UnSolvable")
+        return;
+    }
+    console.time("DFS_Time");
     const stack = new Stack();
     stack.push(initialState); // Enqueue the initial state
     var visited = [];
     while (!stack.isEmpty()) {
         currentState = stack.pop()
         if (isGoal(currentState))
+        {
+            console.timeEnd("DFS_Time");
             return currentState;
+        } 
         else {
             if(currentState.g<=31) //Maximum Moves for solvable 
             {
@@ -315,13 +332,18 @@ function DFS() {
                 });
             }  
         }
-
+        visited.push(currentState);
     }
-    visited.push(currentState);
     return null;
 }
 
 function A_Star_Search(huerstic) {
+    if(!isSolvable(initialState.state))
+    {
+        alert("UnSolvable")
+        return;
+    }
+    console.time("A*_Time");
     const heap = new MinHeap();
     heap.add(initialState);
     var visited = [];
@@ -330,7 +352,10 @@ function A_Star_Search(huerstic) {
         currentState = heap.remove();
         visited.push(currentState);
         if (isGoal(currentState))
+        {
+            console.timeEnd("A*_Time");
             return currentState;
+        }   
         else {
             states = getChildStates(currentState, huerstic);
             states.forEach(element => {
@@ -385,14 +410,22 @@ function TryMove(e) {
     }
     
 }
-
-function isSolvable()
+function getInvCount(state)
 {
-    
-}
-// console.log(ManhattanDistance(initialState.state));
-// console.log(EuclideanDistance(initialState.state));
+    let inv_count = 0 ;
+    for(let i=0;i<9;i++){
+        for(let j=i+1;j<9;j++){
+            // Value 0 is used for empty space 
 
-// var heap = new MinHeap();
-// heap.insert(initialState);
-// console.log(heap.isInHeap(state));
+            if (state[i] > 0 && state[j] > 0 && state[i] > state[j])
+                inv_count += 1;
+        }
+     }
+    return inv_count;
+}
+function isSolvable(state)
+{
+    let invCount = getInvCount(state);
+    // return true if inversion count is even. 
+    return (invCount % 2 == 0);
+}
