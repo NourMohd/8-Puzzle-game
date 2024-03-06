@@ -95,79 +95,127 @@ class Stack {
 }
 
 // A* Algorithm
+ 
 class MinHeap {
     constructor() {
         this.heap = [];
     }
-
-    insert(array) {
-        this.heap.push(array);
-        this.bubbleUp();
+ 
+    // Helper Methods
+    getLeftChildIndex(parentIndex) {
+        return 2 * parentIndex + 1;
     }
-
-    bubbleUp() {
-        let index = this.heap.length - 1;
-        while (index > 0) {
-            let parentIndex = Math.floor((index - 1) / 2);
-            if (this.compare(this.heap[parentIndex], this.heap[index]) <= 0) break;
-            // swap
-            [this.heap[parentIndex], this.heap[index]] = [this.heap[index], this.heap[parentIndex]];
-            index = parentIndex;
-        }
+    getRightChildIndex(parentIndex) {
+        return 2 * parentIndex + 2;
     }
-
-    extractMin() {
-        if (this.heap.length === 0) return null;
-        if (this.heap.length === 1) return this.heap.pop();
-
-        const min = this.heap[0];
-        // Move the last element to the root
-        this.heap[0] = this.heap.pop();
-        this.heapify(0);
-        return min;
+    getParentIndex(childIndex) {
+        return Math.floor((childIndex - 1) / 2);
     }
-
-    heapify(index) {
-        const left = 2 * index + 1;
-        const right = 2 * index + 2;
-        let smallest = index;
-
-        if (left < this.heap.length && this.compare(this.heap[left], this.heap[smallest]) < 0) {
-            smallest = left;
-        }
-        if (right < this.heap.length && this.compare(this.heap[right], this.heap[smallest]) < 0) {
-            smallest = right;
-        }
-        if (smallest !== index) {
-            // swap
-            [this.heap[index], this.heap[smallest]] = [this.heap[smallest], this.heap[index]];
-            this.heapify(smallest);
-        }
+    hasLeftChild(index) {
+        return this.getLeftChildIndex(index) < this.heap.length;
     }
-
+    hasRightChild(index) {
+        return this.getRightChildIndex(index) < this.heap.length;
+    }
+    hasParent(index) {
+        return this.getParentIndex(index) >= 0;
+    }
+    leftChild(index) {
+        return this.heap[this.getLeftChildIndex(index)];
+    }
+    rightChild(index) {
+        return this.heap[this.getRightChildIndex(index)];
+    }
+    parent(index) {
+        return this.heap[this.getParentIndex(index)];
+    }
+ 
+    // Functions to create Min Heap
+     
+    swap(indexOne, indexTwo) {
+        const temp = this.heap[indexOne];
+        this.heap[indexOne] = this.heap[indexTwo];
+        this.heap[indexTwo] = temp;
+    }
+ 
     peek() {
-        return this.heap.length > 0 ? this.heap[0] : null;
+        if (this.heap.length === 0) {
+            return null;
+        }
+        return this.heap[0];
     }
-
-    size() {
-        return this.heap.length;
+     
+    // Removing an element will remove the
+    // top element with highest priority then
+    // heapifyDown will be called 
+    remove() {
+        if (this.heap.length === 0) {
+            return null;
+        }
+        const item = this.heap[0];
+        this.heap[0] = this.heap[this.heap.length - 1];
+        this.heap.pop();
+        this.heapifyDown();
+        return item;
     }
-
-    isEmpty() {
-        return this.heap.length === 0;
+ 
+    add(item) {
+        this.heap.push(item);
+        this.heapifyUp();
     }
-
-    isInHeap(element) {
+ 
+    heapifyUp(idx) {
+        if(idx== null)
+            var index = this.heap.length - 1;
+        else
+            var index = idx;
+        while (this.hasParent(index) && this.parent(index).f > this.heap[index].f) {
+            this.swap(this.getParentIndex(index), index);
+            index = this.getParentIndex(index);
+        }
+    }
+ 
+    heapifyDown() {
+        let index = 0;
+        while (this.hasLeftChild(index)) {
+            let smallerChildIndex = this.getLeftChildIndex(index);
+            if (this.hasRightChild(index) && this.rightChild(index).f < this.leftChild(index).f) {
+                smallerChildIndex = this.getRightChildIndex(index);
+            }
+            if (this.heap[index].f < this.heap[smallerChildIndex].f) {
+                break;
+            } else {
+                this.swap(index, smallerChildIndex);
+            }
+            index = smallerChildIndex;
+        }
+    }
+     
+    printHeap() {
+        var heap =` ${this.heap[0]} `
+        for(var i = 1; i<this.heap.length;i++) {
+            heap += ` ${this.heap[i]} `;
+        }
+        console.log(heap);
+    }
+    isInHeap(element)
+    {
         var inHeap = false;
         this.heap.forEach(e => inHeap = e.state.every((a, index) => a === element.state[index]) ? true : inHeap);
         return inHeap;
     }
-
-    DecreaseKey(element) {
-        //decrease key code
+    decreaseKey(element)
+    {
+        var oldElem = null
+        this.heap.forEach((e,idx) => oldElem = e.state.every((a, index) => a === element.state[index]) ? idx : oldElem); 
+        this.heap[oldElem] = element;
+        this.heapifyUp(oldElem);
+    }
+    isEmpty()
+    {
+        return this.heap.length === 0;
     }
 }
-
 
 
 // Example usage:
@@ -178,7 +226,10 @@ const initialState = {
         1, 2, 5,
         3, 4, 0,
         6, 7, 8
-    ], parent: null
+    ], parent: null,
+    f: null,
+    g:0,
+    h:null,
 };
 
 
@@ -198,7 +249,7 @@ function isValidMove(zeroRow, zeroColumn) {
     }
     return noOfMoves;
 }
-function getChildStates(state) {
+function getChildStates(state, huerstic) {
     var zeroIdx = state.state.indexOf(0);
     var row = Math.floor(zeroIdx / 3);
     var col = zeroIdx - row * 3;
@@ -207,9 +258,15 @@ function getChildStates(state) {
     moves = [...possibleRow, ...possibleCol]
     var states = []
     moves.forEach(element => {
-        newState = { state: [...state["state"]], parent: state }
+        
+        newState = { state: [...state["state"]], parent: state, g:state.g+1,h:null,f:null }
         newState["state"][zeroIdx] = state.state[element];
         newState["state"][element] = 0;
+        if(huerstic!= null)
+        {
+            newState.h = huerstic(newState.state);
+            newState.f = newState.g + newState.h;
+        }
         states.push(newState)
     });
     return states
@@ -217,7 +274,7 @@ function getChildStates(state) {
 
 function isVisited(visited, state) {
     var inVisited = false;
-    visited.forEach(e => inVisited = e.state.every((a, index) => a === element.state[index]) ? true : inVisited);
+    visited.forEach(e => inVisited = e.state.every((a, index) => a === state.state[index]) ? true : inVisited);
     return inVisited;
 }
 function BFS() {
@@ -261,23 +318,23 @@ function DFS() {
     return null;
 }
 
-function A_Star_Search() {
+function A_Star_Search(huerstic) {
     const heap = new MinHeap();
-    heap.insert(initialState);
+    heap.add(initialState);
     var visited = [];
     
     while (!heap.isEmpty()) {
-        currentState = heap.extractMin();
+        currentState = heap.remove();
         visited.push(currentState);
         if (isGoal(currentState))
             return currentState;
         else {
-            states = getChildStates(currentState);
+            states = getChildStates(currentState, huerstic);
             states.forEach(element => {
                 if (!isVisited(visited, element) && !heap.isInHeap(element))
-                    stack.push(element);
+                    heap.add(element);
                 else if (heap.isInHeap(element)) {
-                    // decrease key
+                    decreaseKey(element)
                 }
             });
         }
@@ -300,6 +357,7 @@ function EuclideanDistance(state) {
     var goal = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     var h = 0;
     state.forEach(element => {
+        goalIdx = goal.indexOf(element);
         h += Math.sqrt(Math.pow(Math.floor(state.indexOf(element) / 3) - Math.floor(goalIdx / 3), 2) +
             Math.pow((state.indexOf(element) % 3) - (goalIdx % 3), 2));
     });
