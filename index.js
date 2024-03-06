@@ -221,7 +221,7 @@ class MinHeap {
 // Example usage:
 
 // Define your 2-D array representing the grid
-const initialState = {
+var initialState = {
     state: [
         1, 2, 5,
         3, 4, 0,
@@ -306,11 +306,14 @@ function DFS() {
         if (isGoal(currentState))
             return currentState;
         else {
-            states = getChildStates(currentState);
-            states.forEach(element => {
-                if (!isVisited(visited, element) && !stack.isInStack(element))
-                    stack.push(element);
-            });
+            if(currentState.g<=31) //Maximum Moves for solvable 
+            {
+                states = getChildStates(currentState);
+                states.forEach(element => {
+                    if (!isVisited(visited, element) && !stack.isInStack(element))
+                        stack.push(element);
+                });
+            }  
         }
 
     }
@@ -373,9 +376,20 @@ function isGoal(state) {
 function TryMove(e) {
     var idx = this.dataset.index
     var moves = getChildStates(initialState)
-    console.log(moves)
+    newState = null
+    moves.forEach(e => newState = e.state.indexOf(0)==idx? e: newState);
+    if(newState!=null)
+    {
+        initialState = newState;
+        generateGrid(newState.state)
+    }
+    
 }
 
+function isSolvable()
+{
+    
+}
 // console.log(ManhattanDistance(initialState.state));
 // console.log(EuclideanDistance(initialState.state));
 
