@@ -8,26 +8,56 @@
 
     document.getElementById('dfs-link').addEventListener('click', function(e) {
         e.preventDefault(); // Prevent the default link behavior
-        console.log(DFS());
+        sol = DFS()
+        solStack = getSteps(sol);
+        console.log(sol);
+        document.getElementById('prv').hidden = false;
+        document.getElementById('nxt').hidden = false;
     });
 
     document.getElementById('bfs-link').addEventListener('click', function(e) {
         e.preventDefault(); // Prevent the default link behavior
-        console.log(BFS());
+        sol = BFS()
+        solStack = getSteps(sol);
+        console.log(sol);
+        document.getElementById('prv').hidden = false;
+        document.getElementById('nxt').hidden = false;
     });
 
     document.getElementById('a*Man-link').addEventListener('click', function(e) {
         e.preventDefault(); // Prevent the default link behavior
-        console.log(A_Star_Search(ManhattanDistance));
+        sol = A_Star_Search(ManhattanDistance)
+        solStack = getSteps(sol);
+        console.log(sol);
+        document.getElementById('prv').hidden = false;
+        document.getElementById('nxt').hidden = false;
     });
 
     document.getElementById('a*ECLD-link').addEventListener('click', function(e) {
         e.preventDefault(); // Prevent the default link behavior
-        console.log(A_Star_Search(EuclideanDistance));
+        sol = A_Star_Search(EuclideanDistance)
+        solStack = getSteps(sol);
+        console.log(sol);
+        document.getElementById('prv').hidden = false;
+        document.getElementById('nxt').hidden = false;
     });
   })();
 
-
+var sol =null;
+var solStack = [];
+var idx = 0;
+function getSteps(sol)
+{
+    var stack = [];
+    var temp = sol;
+    while (temp.parent !==null) {
+        stack.push(temp)
+        temp = temp.parent;
+    }
+    stack.push(temp);
+    idx = stack.length -1;
+    return stack
+}
 //////////////////////////////////////////////////////////////////////////////////////
 // Function to generate HTML grid based on the array
 function generateGrid(rows) {
@@ -49,6 +79,10 @@ function generateGrid(rows) {
         gridItem.dataset.index = idx;
         // storing the zero index
         gridItem.textContent = val;
+        if(val ===0)
+        {
+            gridItem.style.background = "red";
+        }
         gridContainer.appendChild(gridItem);
     });
 }
@@ -301,7 +335,16 @@ document.getElementById('randomizeButton').addEventListener('click', function ()
     initialState.state = generateSolvableRandomState();
     generateGrid(initialState.state);
 });
-
+document.getElementById('prv').addEventListener('click', function () {
+    idx = Math.min(idx+1,solStack.length-1);
+    initialState = solStack[idx]
+    generateGrid(initialState.state);
+});
+document.getElementById('nxt').addEventListener('click', function () {
+    idx = Math.max(idx-1,0); 
+    initialState = solStack[idx]
+    generateGrid(initialState.state);
+});
 
 
 // Example usage:
@@ -309,9 +352,9 @@ document.getElementById('randomizeButton').addEventListener('click', function ()
 // Define your 2-D array representing the grid
 var initialState = {
     state: [
-        1, 2, 3,
-        4, 5, 6,
-        7, 8, 0
+        1, 0, 2,
+        3, 4, 5,
+        6, 7, 8
     ], parent: null,
     f: null,
     g:0,
@@ -428,7 +471,7 @@ function A_Star_Search(huerstic) {
                 if (!isVisited(visited, element) && !heap.isInHeap(element))
                     heap.add(element);
                 else if (heap.isInHeap(element)) {
-                    decreaseKey(element)
+                    heap.decreaseKey(element)
                 }
             });
         }
