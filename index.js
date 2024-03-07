@@ -1,7 +1,42 @@
+(function() {
+    // Bind Click event to the drop down navigation button
+    document.querySelector('.nav-button').addEventListener('click', function() {
+      /*  Toggle the CSS closed class which reduces the height of the UL thus 
+          hiding all LI apart from the first */
+      this.parentNode.parentNode.classList.toggle('closed')
+    }, false);
+
+    document.getElementById('dfs-link').addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent the default link behavior
+        console.log(DFS());
+    });
+
+    document.getElementById('bfs-link').addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent the default link behavior
+        console.log(BFS());
+    });
+
+    document.getElementById('a*Man-link').addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent the default link behavior
+        console.log(A_Star_Search(ManhattanDistance));
+    });
+
+    document.getElementById('a*ECLD-link').addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent the default link behavior
+        console.log(A_Star_Search(EuclideanDistance));
+    });
+  })();
 
 
+//////////////////////////////////////////////////////////////////////////////////////
 // Function to generate HTML grid based on the array
 function generateGrid(rows) {
+
+    if(!isSolvableState(rows)){
+        console.log("the initial state is not solvable");
+    }
+
+
     const gridContainer = document.getElementById('gridContainer');
     gridContainer.innerHTML = ''; // Clear previous content
 
@@ -17,6 +52,8 @@ function generateGrid(rows) {
         gridContainer.appendChild(gridItem);
     });
 }
+////////////////////////////////////////////////////////////////////////////////////////
+
 
 // BFS Algorithm
 class Queue {
@@ -95,7 +132,7 @@ class Stack {
 }
 
 // A* Algorithm
- 
+    
 class MinHeap {
     constructor() {
         this.heap = [];
@@ -204,13 +241,17 @@ class MinHeap {
         this.heap.forEach(e => inHeap = e.state.every((a, index) => a === element.state[index]) ? true : inHeap);
         return inHeap;
     }
-    decreaseKey(element)
-    {
-        var oldElem = null
-        this.heap.forEach((e,idx) => oldElem = e.state.every((a, index) => a === element.state[index]) ? idx : oldElem); 
+    decreaseKey(element) {
+        if (!element || !element.state) {
+            return; // Handle null or undefined elements
+        }
+    
+        var oldElem = null;
+        this.heap.forEach((e, idx) => oldElem = e.state.every((a, index) => a === element.state[index]) ? idx : oldElem);
         this.heap[oldElem] = element;
         this.heapifyUp(oldElem);
     }
+    
     isEmpty()
     {
         return this.heap.length === 0;
@@ -218,14 +259,59 @@ class MinHeap {
 }
 
 
+
+// Function to generate a solvable random initial state
+function generateSolvableRandomState() {
+    let randomState;
+    do {
+        randomState = generateRandomState();
+    } while (!isSolvableState(randomState));
+
+    return randomState;
+}
+
+// Function to generate a random initial state
+function generateRandomState() {
+    const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    // Shuffle the numbers randomly
+    for (let i = numbers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+    }
+
+    return numbers;
+}
+
+// Function to check if a state is solvable
+function isSolvableState(state) {
+    let inversionCount = 0;
+    for (let i = 0; i < state.length; i++) {
+        for (let j = i + 1; j < state.length; j++) {
+            if (state[i] > state[j] && state[i] !== 0 && state[j] !== 0) {
+                inversionCount++;
+            }
+        }
+    }
+
+    return inversionCount % 2 === 0;
+}
+
+// Event listener for the randomization button
+document.getElementById('randomizeButton').addEventListener('click', function () {
+    initialState.state = generateSolvableRandomState();
+    generateGrid(initialState.state);
+});
+
+
+
 // Example usage:
 
 // Define your 2-D array representing the grid
 var initialState = {
     state: [
-        1, 2, 5,
-        3, 4, 0,
-        6, 7, 8
+        1, 2, 3,
+        4, 5, 6,
+        7, 8, 0
     ], parent: null,
     f: null,
     g:0,
@@ -236,6 +322,8 @@ var initialState = {
 
 // Call the function with your array
 generateGrid(initialState.state);
+
+
 
 var noOfMoves = 0;
 function isValidMove(zeroRow, zeroColumn) {
@@ -249,6 +337,9 @@ function isValidMove(zeroRow, zeroColumn) {
     }
     return noOfMoves;
 }
+
+/////////////////////////////////////////////////
+
 function getChildStates(state, huerstic) {
     var zeroIdx = state.state.indexOf(0);
     var row = Math.floor(zeroIdx / 3);
@@ -278,22 +369,13 @@ function isVisited(visited, state) {
     return inVisited;
 }
 function BFS() {
-    if(!isSolvable(initialState.state))
-    {
-        alert("UnSolvable")
-        return;
-    }
-    console.time("BFS_Time");
     const queue = new Queue();
     queue.enqueue(initialState); // Enqueue the initial state
     var visited = [];
     while (!queue.isEmpty()) {
         currentState = queue.dequeue()
         if (isGoal(currentState))
-        {
-            console.timeEnd("BFS_Time");
             return currentState;
-        }    
         else {
             states = getChildStates(currentState);
             states.forEach(element => {
@@ -301,27 +383,19 @@ function BFS() {
                     queue.enqueue(element);
             });
         }
-        visited.push(currentState);
+
     }
+    visited.push(currentState);
     return null;
 }
 function DFS() {
-    if(!isSolvable(initialState.state))
-    {
-        alert("UnSolvable")
-        return;
-    }
-    console.time("DFS_Time");
     const stack = new Stack();
     stack.push(initialState); // Enqueue the initial state
     var visited = [];
     while (!stack.isEmpty()) {
         currentState = stack.pop()
         if (isGoal(currentState))
-        {
-            console.timeEnd("DFS_Time");
             return currentState;
-        } 
         else {
             if(currentState.g<=31) //Maximum Moves for solvable 
             {
@@ -332,18 +406,13 @@ function DFS() {
                 });
             }  
         }
-        visited.push(currentState);
+
     }
+    visited.push(currentState);
     return null;
 }
 
 function A_Star_Search(huerstic) {
-    if(!isSolvable(initialState.state))
-    {
-        alert("UnSolvable")
-        return;
-    }
-    console.time("A*_Time");
     const heap = new MinHeap();
     heap.add(initialState);
     var visited = [];
@@ -352,10 +421,7 @@ function A_Star_Search(huerstic) {
         currentState = heap.remove();
         visited.push(currentState);
         if (isGoal(currentState))
-        {
-            console.timeEnd("A*_Time");
             return currentState;
-        }   
         else {
             states = getChildStates(currentState, huerstic);
             states.forEach(element => {
@@ -391,41 +457,40 @@ function EuclideanDistance(state) {
     });
     return h;
 }
-function isGoal(state) {
-    var isSorted = true
-    state.state.forEach((element, i) => {
-        isSorted = i == element ? isSorted : false
-    });
-    return isSorted
-}
-function TryMove(e) {
-    var idx = this.dataset.index
-    var moves = getChildStates(initialState)
-    newState = null
-    moves.forEach(e => newState = e.state.indexOf(0)==idx? e: newState);
-    if(newState!=null)
-    {
-        initialState = newState;
-        generateGrid(newState.state)
-    }
-    
-}
-function getInvCount(state)
-{
-    let inv_count = 0 ;
-    for(let i=0;i<9;i++){
-        for(let j=i+1;j<9;j++){
-            // Value 0 is used for empty space 
 
-            if (state[i] > 0 && state[j] > 0 && state[i] > state[j])
-                inv_count += 1;
-        }
-     }
-    return inv_count;
+function isGoal(state) {
+    if (!state || !state.state) {
+        return false; // Handle null or undefined states
+    }
+
+    var isSorted = true;
+    state.state.forEach((element, i) => {
+        isSorted = i === element ? isSorted : false;
+    });
+    return isSorted;
 }
-function isSolvable(state)
-{
-    let invCount = getInvCount(state);
-    // return true if inversion count is even. 
-    return (invCount % 2 == 0);
+
+
+function TryMove(e) {
+    var idx = this.dataset.index;
+    var moves = getChildStates(initialState);
+    var newState = null;
+
+    moves.forEach(e => {
+        newState = e.state.indexOf(0) === +idx ? e : newState;
+    });
+
+    if (newState != null) {
+        initialState = {
+            state: newState.state.slice(),
+            parent: newState.parent,
+            f: newState.f,
+            g: newState.g,
+            h: newState.h
+        };
+        generateGrid(initialState.state);
+    }
 }
+
+
+

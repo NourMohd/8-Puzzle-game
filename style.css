@@ -1,24 +1,95 @@
 /* Style for the grid */
+/* Style for the grid */
+
+body{
+  background-color:crimson;
+}
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(3,minmax(0,1fr));
-  grid-template-rows: repeat(3,minmax(0,1fr));
-  grid-gap: 5px;
-  height:1000px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  grid-gap: 20px; /* Increased grid gap for better spacing */
+  height: 80vh; /* Set the grid container height to 80% of the viewport height */
+  justify-content: center;
+  align-items: center;
 }
 
 /* Style for grid items */
+/* Style for grid items */
 .grid-item {
-  background-color: #ccc;
-  padding: 20px;
+  background-color: #3498db;
+  color: #fff;
+  padding: 30px; /* Increased padding to make grid items bigger */
   text-align: center;
   cursor: pointer;
+  /* transition: background-color 0.3s; */
+  transition: transform 0.3s ease; /* Add a smooth transition effect */
+
+  font-size: 85px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .grid-item:hover {
   background-color: #ddd;
 }
+
+.grid-item.clicked {
+  transform: scale(1.1); /* Add a scale effect when clicked */
+}
 div {
   background-color: red;
   aspect-ratio: 1;
+}
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+nav{
+  margin-left: 50px;
+}
+
+nav .drop-down {
+  list-style: none; 
+  overflow: hidden; /* When ul height is reduced, ensure overflowing li are not shown */
+  height: 220px; /* 172px = (38 (li) + 5 (li border)) * 4 (number of li) */
+  background-color: #34495e;
+  font-family: Arial;
+  width: 200px;
+  margin: 0 auto;
+  padding: 0;
+  text-align: center;
+  -webkit-transition: height 0.3s ease;
+          transition: height 0.3s ease;
+}
+
+nav .drop-down.closed {
+  /*  When toggled via jQuery this class will reduce the height of the ul which inconjuction
+      with overflow: hidden set on the ul will hide all list items apart from the first */
+  /* current li height 38px + 5px border */
+  height: 43px;
+}
+
+nav .drop-down li {
+  border-bottom: 5px solid #2c3e50;
+}
+
+nav .drop-down li a {
+  display: block;
+  color: #ecf0f1;
+  text-decoration: none;
+  padding: 10px; /* Larger touch target area */
+}
+
+nav .drop-down li:first-child a:after {
+  content: "\25BC";
+  float: right;
+  margin-left: -30px; /* Excessive -margin to bring link text back to center */
+  margin-right: 5px;
 }
