@@ -82,6 +82,7 @@ function generateGrid(rows) {
         if(val ===0)
         {
             gridItem.style.background = "red";
+            gridItem.textContent = '';
         }
         gridContainer.appendChild(gridItem);
     });
@@ -352,13 +353,13 @@ document.getElementById('nxt').addEventListener('click', function () {
 // Define your 2-D array representing the grid
 var initialState = {
     state: [
-        1, 0, 2,
-        3, 4, 5,
-        6, 7, 8
+        8, 2, 1,
+        5, 4, 6,
+        0, 3, 7
     ], parent: null,
     f: null,
     g:0,
-    h:null,
+    h:null,     
 };
 
 
@@ -412,13 +413,21 @@ function isVisited(visited, state) {
     return inVisited;
 }
 function BFS() {
+    var maxedepth = 0
+    console.time('BFS_time');
     const queue = new Queue();
     queue.enqueue(initialState); // Enqueue the initial state
     var visited = [];
     while (!queue.isEmpty()) {
         currentState = queue.dequeue()
+        maxedepth = Math.max(maxedepth, currentState.g)
         if (isGoal(currentState))
-            return currentState;
+        {
+            console.timeEnd('BFS_time');
+            console.log("Expanded Nodes: " + visited)
+            console.log("Search: "+maxedepth)
+           return currentState;
+        }
         else {
             states = getChildStates(currentState);
             states.forEach(element => {
@@ -428,17 +437,23 @@ function BFS() {
         }
 
     }
-    visited.push(currentState);
+    visited.push(currentState)
     return null;
 }
 function DFS() {
+    console.time('DFS_time')
+    var maxedepth = 0
     const stack = new Stack();
     stack.push(initialState); // Enqueue the initial state
     var visited = [];
     while (!stack.isEmpty()) {
         currentState = stack.pop()
-        if (isGoal(currentState))
-            return currentState;
+        maxedepth = Math.max(maxedepth, currentState.g)
+        if (isGoal(currentState)){
+        console.timeEnd("DFS_time");
+        console.log("Expanded Nodes: " + visited.length)
+        console.log("Search: "+maxedepth)
+            return currentState;}
         else {
             if(currentState.g<=31) //Maximum Moves for solvable 
             {
@@ -456,15 +471,24 @@ function DFS() {
 }
 
 function A_Star_Search(huerstic) {
+    var maxedepth = 0
+    console.time('A*_time');
     const heap = new MinHeap();
     heap.add(initialState);
     var visited = [];
     
     while (!heap.isEmpty()) {
         currentState = heap.remove();
+        maxedepth = Math.max(maxedepth, currentState.g)
         visited.push(currentState);
         if (isGoal(currentState))
-            return currentState;
+        {
+        console.timeEnd('A*_time');
+        console.log("Expanded Nodes: " + visited.length)
+        console.log("Search: "+maxedepth)
+        return currentState;
+        
+        }
         else {
             states = getChildStates(currentState, huerstic);
             states.forEach(element => {
